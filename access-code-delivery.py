@@ -4,10 +4,15 @@ import requests
 import sendgrid
 from sendgrid.helpers.mail import Mail, Email, To, Content
 import os
+from dotenv import load_dotenv  # Import dotenv to load local .env files
 
+# Initialize Flask app
 app = Flask(__name__)
 
-# Load environment variables
+# Load environment variables from a .env file if available (for local development)
+load_dotenv()
+
+# Set up API keys from environment variables
 stripe.api_key = os.getenv("STRIPE_API_KEY")  # Stripe API secret key
 endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")  # Stripe webhook secret
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")  # SendGrid API key
@@ -88,5 +93,6 @@ def stripe_webhook():
     return jsonify({'status': 'success'})
 
 if __name__ == '__main__':
+    # Heroku provides PORT as an environment variable
     port = int(os.environ.get("PORT", 4242))
     app.run(host="0.0.0.0", port=port)
