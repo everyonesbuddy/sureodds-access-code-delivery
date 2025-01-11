@@ -53,6 +53,11 @@ def send_email(to_email, code):
     except Exception as e:
         print(f"Error sending email: {e}")
 
+@app.route('/')
+def index():
+    """Default route to show a welcome message."""
+    return "Welcome to Access Code Delivery!"
+
 @app.route('/webhook', methods=['POST'])
 def stripe_webhook():
     """Stripe webhook to handle successful payments."""
