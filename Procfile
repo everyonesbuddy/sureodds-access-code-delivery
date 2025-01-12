@@ -1,1 +1,1 @@
-web: python access-code-delivery.py
+web: gunicorn access-code-delivery:app
