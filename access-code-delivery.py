@@ -27,7 +27,7 @@ def generate_code():
         codes = response.json()
 
         for code_entry in codes:
-            if code_entry.get("isUsed") == "FALSE":
+            if code_entry.get("isUsed") == "FALSE" and code_entry.get("isSent") == "FALSE":
                 return code_entry.get("Code")
 
         print("No unused codes available.")
@@ -35,6 +35,24 @@ def generate_code():
     except requests.exceptions.RequestException as e:
         print(f"Error fetching codes from API: {e}")
         return None
+
+def update_code_status(code):
+    """Update the code's status to used."""
+    url = f"https://api.sheetbest.com/sheets/ef14d1b6-72df-47a9-8be8-9046b19cfa87/Code/{code}"
+    headers = {
+        "Content-Type": "application/json",
+    }
+    data = {
+        "Code": code,
+        "isSent": "TRUE",
+    }
+
+    try:
+        response = requests.patch(url, headers=headers, json=data)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        print(f"Code {code} status updated to used.")
+    except requests.exceptions.RequestException as e:
+        print(f"Error updating code status: {e}")
 
 def send_email(to_email, code):
     """Send the generated code to the user's email using SendGrid."""
@@ -50,6 +68,7 @@ def send_email(to_email, code):
         print(f"Email sent to {to_email.email} with code {code}")
         print(f"SendGrid Response Status: {response.status_code}")
         print(f"SendGrid Response Body: {response.body}")
+        update_code_status(code)  # Update the code's status after sending the email
     except Exception as e:
         print(f"Error sending email: {e}")
 
