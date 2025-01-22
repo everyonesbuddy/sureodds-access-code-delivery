@@ -60,7 +60,7 @@ def send_email(to_email, code):
     from_email = Email("info@sure-odds.com")  # Your verified sender email
     to_email = To(to_email)
     subject = "Your Unblock Code"
-    content = Content("text/plain", f"Thank you for your payment! Here is your unblock code: {code}\n\nUse this code to unblock your sites for 5 minutes.")
+    content = Content("text/plain", f"Thank you for your payment! Here is your unblock code: {code}\n\nUse this code to unblock your sites for 10 minutes.")
     mail = Mail(from_email, to_email, subject, content)
 
     try:
