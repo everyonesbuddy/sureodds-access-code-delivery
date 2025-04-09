@@ -19,32 +19,34 @@ SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")  # SendGrid API key
 
 def generate_code():
     """Fetch an unused code from the API."""
-    url = "https://api.sheetbest.com/sheets/ef14d1b6-72df-47a9-8be8-9046b19cfa87"
+    url = "https://sure-odds-be-482948f2bda5.herokuapp.com/api/v1/codes/"
 
     try:
         response = requests.get(url)
         response.raise_for_status()  # Raise an exception for HTTP errors
         codes = response.json()
 
-        for code_entry in codes:
-            if code_entry.get("isUsed") == "FALSE" and code_entry.get("isSent") == "FALSE":
-                return code_entry.get("Code")
+        print(f"Fetched codes: {codes}")  # Debugging line to check fetched codes
+
+        for code_entry in codes["data"]:
+            if code_entry.get("isUsed") == False and code_entry.get("isSent") == False:
+                return code_entry.get("code"), code_entry.get("_id")  # Return both code and _id
 
         print("No unused codes available.")
-        return None
+        return None, None  # Return None if no unused codes are found
     except requests.exceptions.RequestException as e:
         print(f"Error fetching codes from API: {e}")
-        return None
+        return None, None  # Return None if there was an error
 
-def update_code_status(code):
+def update_code_status(code, code_id):
     """Update the code's status to used."""
-    url = f"https://api.sheetbest.com/sheets/ef14d1b6-72df-47a9-8be8-9046b19cfa87/Code/{code}"
+    url = f"https://sure-odds-be-482948f2bda5.herokuapp.com/api/v1/codes/{code_id}"
     headers = {
         "Content-Type": "application/json",
     }
     data = {
-        "Code": code,
-        "isSent": "TRUE",
+        "code": code,
+        "isSent": True,
     }
 
     try:
@@ -54,7 +56,7 @@ def update_code_status(code):
     except requests.exceptions.RequestException as e:
         print(f"Error updating code status: {e}")
 
-def send_email(to_email, code):
+def send_email(to_email, code, code_id):
     """Send the generated code to the user's email using SendGrid."""
     sg = sendgrid.SendGridAPIClient(api_key=SENDGRID_API_KEY)
     from_email = Email("info@sure-odds.com")  # Your verified sender email
@@ -68,7 +70,7 @@ def send_email(to_email, code):
         print(f"Email sent to {to_email.email} with code {code}")
         print(f"SendGrid Response Status: {response.status_code}")
         print(f"SendGrid Response Body: {response.body}")
-        update_code_status(code)  # Update the code's status after sending the email
+        update_code_status(code, code_id)  # Update the code's status after sending the email
     except Exception as e:
         print(f"Error sending email: {e}")
 
@@ -102,10 +104,10 @@ def stripe_webhook():
 
         if email:
             print(f"Payment succeeded for email: {email}")
-            code = generate_code()
-            if code:
-                send_email(email, code)
-                print(f"Code {code} sent to {email}")
+            code, code_id = generate_code()  # Unpack the tuple returned by generate_code
+            if code and code_id:
+                send_email(email, code, code_id)
+                print(f"Code {code} (ID: {code_id}) sent to {email}")
             else:
                 print("No unused code available to send.")
         else:
