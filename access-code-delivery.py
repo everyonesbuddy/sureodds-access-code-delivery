@@ -26,8 +26,6 @@ def generate_code():
         response.raise_for_status()  # Raise an exception for HTTP errors
         codes = response.json()
 
-        print(f"Fetched codes: {codes}")  # Debugging line to check fetched codes
-
         for code_entry in codes["data"]:
             if code_entry.get("isUsed") == False and code_entry.get("isSent") == False:
                 return code_entry.get("code"), code_entry.get("_id")  # Return both code and _id
