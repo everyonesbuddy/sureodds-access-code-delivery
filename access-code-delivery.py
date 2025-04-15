@@ -1,8 +1,6 @@
 from flask import Flask, request, jsonify
 import stripe
 import requests
-import sendgrid
-from sendgrid.helpers.mail import Mail, Email, To, Content
 from postmarker.core import PostmarkClient
 import os
 from dotenv import load_dotenv  # Import dotenv to load local .env files
