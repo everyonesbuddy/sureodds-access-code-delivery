@@ -3,6 +3,7 @@ import stripe
 import requests
 import sendgrid
 from sendgrid.helpers.mail import Mail, Email, To, Content
+from postmarker.core import PostmarkClient
 import os
 from dotenv import load_dotenv  # Import dotenv to load local .env files
 
@@ -16,6 +17,8 @@ load_dotenv()
 stripe.api_key = os.getenv("STRIPE_API_KEY")  # Stripe API secret key
 endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")  # Stripe webhook secret
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")  # SendGrid API key
+POSTMARK_API_TOKEN = os.getenv("POSTMARK_API_TOKEN")
+POSTMARK_SENDER_EMAIL = os.getenv("POSTMARK_SENDER_EMAIL")  # verified sender
 
 def generate_code():
     """Fetch an unused code from the API."""
@@ -55,22 +58,21 @@ def update_code_status(code, code_id):
         print(f"Error updating code status: {e}")
 
 def send_email(to_email, code, code_id):
-    """Send the generated code to the user's email using SendGrid."""
-    sg = sendgrid.SendGridAPIClient(api_key=SENDGRID_API_KEY)
-    from_email = Email("info@sure-odds.com")  # Your verified sender email
-    to_email = To(to_email)
-    subject = "Your Unblock Code"
-    content = Content("text/plain", f"Thank you for your payment! Here is your 10 minutes unblock code: {code}\n\nEnjoy unlimited entries once applied.")
-    mail = Mail(from_email, to_email, subject, content)
+    """Send the generated code to the user's email using Postmark."""
+    client = PostmarkClient(server_token=POSTMARK_API_TOKEN)
 
     try:
-        response = sg.send(mail)
-        print(f"Email sent to {to_email.email} with code {code}")
-        print(f"SendGrid Response Status: {response.status_code}")
-        print(f"SendGrid Response Body: {response.body}")
+        response = client.emails.send(
+            From=POSTMARK_SENDER_EMAIL,
+            To=to_email,
+            Subject="Your Unblock Code",
+            TextBody=f"Thank you for your payment! Here is your 10 minutes unblock code: {code}\n\nEnjoy unlimited entries once applied."
+        )
+        print(f"Email sent to {to_email} with code {code}")
+        print(f"Postmark Response: {response}")
         update_code_status(code, code_id)  # Update the code's status after sending the email
     except Exception as e:
-        print(f"Error sending email: {e}")
+        print(f"Error sending email via Postmark: {e}")
 
 @app.route('/')
 def index():
