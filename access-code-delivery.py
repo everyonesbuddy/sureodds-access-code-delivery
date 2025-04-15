@@ -16,7 +16,6 @@ load_dotenv()
 # Set up API keys from environment variables
 stripe.api_key = os.getenv("STRIPE_API_KEY")  # Stripe API secret key
 endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")  # Stripe webhook secret
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")  # SendGrid API key
 POSTMARK_API_TOKEN = os.getenv("POSTMARK_API_TOKEN")
 POSTMARK_SENDER_EMAIL = os.getenv("POSTMARK_SENDER_EMAIL")  # verified sender
 

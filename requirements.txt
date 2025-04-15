@@ -2,6 +2,5 @@ Flask==3.0.3
 gunicorn==21.2.0
 python-dotenv==1.0.0
 requests==2.32.2
-sendgrid==6.11.0
 stripe==9.4.0
 postmarker==1.0
